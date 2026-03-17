@@ -1,0 +1,21 @@
+# Environments
+venv/
+.env
+
+# Python junk
+__pycache__/
+*.pyc
+*.pyo
+
+# Local uploads and results
+backend/uploads/
+backend/results/
+backend/embeddings/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

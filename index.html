@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Face Matching System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Video Face Matching System</h1>
+            <p>Upload known photos and a video to identify matches.</p>
+        </header>
+
+        <main>
+            <section class="upload-card">
+                <h2>Upload Known Photos</h2>
+                <p class="subtitle">Select images of faces to match against the video.</p>
+                <div class="upload-area" id="photo-drop-zone">
+                    <input type="file" id="photo-upload" multiple accept=".jpg,.jpeg,.png" hidden>
+                    <label for="photo-upload" class="upload-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span>Choose Photos</span>
+                    </label>
+                </div>
+                <div id="photo-preview-grid" class="preview-grid"></div>
+            </section>
+
+            <section class="upload-card">
+                <h2>Upload Video</h2>
+                <p class="subtitle">Select a single video file to scan for faces.</p>
+                <div class="upload-area" id="video-drop-zone">
+                    <input type="file" id="video-upload" accept=".mp4,.avi,.mov" hidden>
+                    <label for="video-upload" class="upload-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><polyline points="8 21 12 17 16 21"/></svg>
+                        <span>Choose Video</span>
+                    </label>
+                </div>
+                <div id="video-preview-container" class="video-preview-wrapper hidden">
+                    <div class="video-container">
+                        <video id="video-player"></video>
+                        <div id="face-overlay" class="face-overlay"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="action-area">
+                <button id="start-matching-btn" class="primary-btn">Start Face Matching</button>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
