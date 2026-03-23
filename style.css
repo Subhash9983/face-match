@@ -243,26 +243,43 @@ main {
 .action-area {
     text-align: center;
     padding-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+.primary-btn, .secondary-btn {
+    padding: 1.25rem 3rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: none;
 }
 
 .primary-btn {
     background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
     color: white;
-    border: none;
-    padding: 1.25rem 3.5rem;
-    font-size: 1.2rem;
-    font-weight: 700;
-    border-radius: 100px;
-    cursor: pointer;
-    transition: all 0.3s ease;
     box-shadow: 0 10px 25px var(--primary-glow);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
 }
 
-.primary-btn:hover:not(:disabled) {
+.secondary-btn {
+    background: var(--glass);
+    color: var(--text-white);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(8px);
+}
+
+.primary-btn:hover:not(:disabled), .secondary-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 15px 35px var(--primary-glow);
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--text-white);
 }
 
 .primary-btn:disabled {

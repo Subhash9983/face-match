@@ -38,4 +38,4 @@ def draw_faces(image, faces):
     for face in faces:
         bbox = face.bbox.astype(int)
         cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)
-    return image
+    return image  

@@ -2,6 +2,7 @@ import os
 import shutil
 from typing import List
 from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi.responses import FileResponse, Response
 
 from services.embedding_generation import get_multiple_embeddings
 from services.video_processing import process_video_and_match
@@ -77,3 +78,24 @@ async def start_matching():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during processing: {str(e)}")
+
+@router.get("/download-processed-video")
+async def download_processed_video():
+    results_dir = os.path.join(BASE_DIR, "results")
+    video_path = os.path.join(results_dir, "processed_video.mp4")
+    
+    if not os.path.exists(video_path):
+        raise HTTPException(status_code=404, detail="Processed video not found. Please run matching first.")
+    
+    # Read file and return with explicit headers to force download
+    with open(video_path, "rb") as f:
+        video_bytes = f.read()
+    
+    return Response(
+        content=video_bytes,
+        media_type="video/mp4",
+        headers={
+            "Content-Disposition": 'attachment; filename="face_match_output.mp4"',
+            "Content-Length": str(len(video_bytes))
+        }
+    )

@@ -44,5 +44,3 @@ def get_multiple_embeddings(image_paths: list):
             milvus_id = save_face(name, emb)
             results.append({"name": name, "id": str(milvus_id)})
     return results
-
-    return results

@@ -17,7 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Elements - Actions
     const startBtn = document.getElementById('start-matching-btn');
+    const downloadResultsBtn = document.getElementById('download-results-btn');
+    const downloadVideoBtn = document.getElementById('download-video-btn');
 
+    let matchResultsData = null; // Store full results object
     let matchResults = []; // To store data from backend
     let animationFrameId = null;
 
@@ -98,62 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /**
-     * Rendering logic: Draw boxes based on video timestamp
+     * Rendering logic: Handled by processed video from server now.
      */
-    const renderBoxes = () => {
-        if (videoPlayer.paused || videoPlayer.ended) {
-            cancelAnimationFrame(animationFrameId);
-            return;
-        }
-
-        const currentTimeMs = videoPlayer.currentTime * 1000;
-        
-        // Find the closest frame result from the backend data
-        // backend results are stored with 'millisecond' key
-        const frameData = matchResults.find(r => Math.abs(r.millisecond - currentTimeMs) < 100);
-
-        faceOverlay.innerHTML = ''; // Clear previous boxes
-
-        if (frameData) {
-            frameData.faces.forEach(face => {
-                const box = document.createElement('div');
-                box.className = 'face-box';
-                
-                // Backend bbox is [x1, y1, x2, y2] in pixels
-                // We need to convert to percentage for responsive overlay
-                // Note: This assumes overlay matches video dimensions exactly
-                const videoWidth = videoPlayer.videoWidth;
-                const videoHeight = videoPlayer.videoHeight;
-
-                const x1 = (face.bbox[0] / videoWidth) * 100;
-                const y1 = (face.bbox[1] / videoHeight) * 100;
-                const width = ((face.bbox[2] - face.bbox[0]) / videoWidth) * 100;
-                const height = ((face.bbox[3] - face.bbox[1]) / videoHeight) * 100;
-
-                box.style.left = `${x1}%`;
-                box.style.top = `${y1}%`;
-                box.style.width = `${width}%`;
-                box.style.height = `${height}%`;
-
-                const similarity = (face.similarity * 100).toFixed(1);
-                const tag = document.createElement('div');
-                tag.className = 'similarity-tag';
-                
-                // Use backend provided status and match flag
-                if (face.is_matched) {
-                    box.classList.add('matched');
-                    tag.innerHTML = `<span>${face.status}</span>${face.name}<br>Similarity: ${similarity}%`;
-                } else {
-                    tag.innerHTML = `<span>${face.status}</span>Similarity: ${similarity}%`;
-                }
-                
-                box.appendChild(tag);
-                faceOverlay.appendChild(box);
-            });
-        }
-
-        animationFrameId = requestAnimationFrame(renderBoxes);
-    };
 
     /**
      * Handle Start Button Click
@@ -172,10 +121,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.status === "success") {
-                matchResults = data.results;
+                matchResultsData = data.results;
+                console.log("Attendance Summary:", data.results.summary);
+                
+                // Switch to processed video which has boxes/labels burned in
+                const processedVideoUrl = `http://localhost:8000${data.results.video_url}?t=${Date.now()}`;
+                videoPlayer.src = processedVideoUrl;
+                videoPlayer.load();
                 videoPlayer.play();
+
                 startBtn.textContent = "Matching Results Playing";
-                renderBoxes();
+                downloadResultsBtn.classList.remove('hidden');
+                downloadVideoBtn.classList.remove('hidden');
+                faceOverlay.innerHTML = ''; // Ensure overlay is empty
             } else {
                 throw new Error(data.detail || "Processing failed");
             }
@@ -191,5 +149,30 @@ document.addEventListener('DOMContentLoaded', () => {
         startBtn.textContent = "Start Face Matching";
         faceOverlay.innerHTML = '';
         cancelAnimationFrame(animationFrameId);
+    });
+
+    /**
+     * Download Results as JSON
+     */
+    downloadResultsBtn.addEventListener('click', () => {
+        if (!matchResultsData) return;
+        
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(matchResultsData, null, 4));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "face_match_results.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    });
+
+    /**
+     * Download Processed Video (Using dedicated download endpoint)
+     */
+    downloadVideoBtn.addEventListener('click', () => {
+        // Use window.location.href - works correctly for cross-origin (port:3000 -> port:8000)
+        // The backend sends Content-Disposition: attachment header which forces download
+        window.location.href = `${API_BASE}/download-processed-video`;
+        showStatus("Download initiated...");
     });
 });

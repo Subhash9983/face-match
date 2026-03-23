@@ -1,8 +1,9 @@
 from services.database.milvus import collection
 from services.database.mongo import get_metadata
 
-# Match threshold (Lowered for CCTV sensitivity)
-MATCH_THRESHOLD = 0.45
+# Match threshold - 0.42: catches more valid matches
+# If too many false names appear, increase to 0.47
+MATCH_THRESHOLD = 0.42
 
 def search_face(embedding):
     """
@@ -18,17 +19,23 @@ def search_face(embedding):
         data=[embedding.tolist()],
         anns_field="embedding",
         param=search_params,
-        limit=1,
+        limit=1,   # Check top 3 to see if Abhishek is hiding at rank 2 or 3
         expr=None
     )
 
     if not results or len(results[0]) == 0:
         return _unknown_result()
 
+    # DEBUG: Print top 3 matches to terminal
+    print(f"--- Top 3 Matches for current face ---")
+    for i, hit in enumerate(results[0]):
+        meta = get_metadata(hit.id)
+        name = meta["name"] if meta else "No Metadata"
+        print(f"  Rank {i+1}: '{name}' score={hit.distance:.4f}")
+
     best_hit = results[0][0]
     best_id = best_hit.id
-    best_score = best_hit.distance # In COSINE, higher is better? Actually Milvus COSINE is distance 1-sim usually? 
-    # Actually Milvus MetricType.COSINE: the distance range is [-1, 1]. The larger the distance, the more similar the vectors are.
+    best_score = best_hit.distance
     
     metadata = get_metadata(best_id)
     if not metadata:
@@ -36,6 +43,10 @@ def search_face(embedding):
 
     best_name = metadata["name"]
     is_matched = (best_score >= MATCH_THRESHOLD)
+
+    # DEBUG: print every search result so you can see actual scores
+    print(f"[DB SEARCH] Best match: '{best_name}' score={best_score:.4f} "
+          f"threshold={MATCH_THRESHOLD} matched={is_matched}")
 
     if is_matched:
         display_name = best_name.rsplit('.', 1)[0]

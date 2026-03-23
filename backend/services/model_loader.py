@@ -11,7 +11,7 @@ class ModelLoader:
             # Initialize InsightFace App
             # buffalo_l is the largest and most accurate model set
             cls._instance.app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
-            cls._instance.app.prepare(ctx_id=0, det_size=(640, 640))
+            cls._instance.app.prepare(ctx_id=1, det_size=(640, 640))
         return cls._instance
 
     @property

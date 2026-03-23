@@ -17,16 +17,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Ensure upload directories exist
-UPLOADS_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+# Ensure directories exist
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
+RESULTS_DIR = os.path.join(BASE_DIR, "results")
 PHOTOS_DIR = os.path.join(UPLOADS_DIR, "photos")
 VIDEOS_DIR = os.path.join(UPLOADS_DIR, "videos")
 
-for path in [PHOTOS_DIR, VIDEOS_DIR]:
+for path in [PHOTOS_DIR, VIDEOS_DIR, RESULTS_DIR]:
     os.makedirs(path, exist_ok=True)
 
-# Mount static files if you want to view uploaded content directly
+# Mount static files
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+app.mount("/results", StaticFiles(directory=RESULTS_DIR), name="results")
 
 @app.get("/")
 async def root():
